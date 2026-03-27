@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RouterRank — Curated Router Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #04050f;
+    --surface: #0a0c1e;
+    --card: #0e1128;
+    --border: rgba(100,120,255,0.12);
+    --accent: #5b7fff;
+    --accent2: #a78bfa;
+    --glow: rgba(91,127,255,0.35);
+    --text: #e8eaf6;
+    --muted: #7880a4;
+    --gold: #f5c842;
+    --green: #34d399;
+    --radius: 18px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── BG mesh ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(91,127,255,0.13) 0%, transparent 65%),
+      radial-gradient(ellipse 60% 50% at 80% 80%, rgba(167,139,250,0.10) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 60% 30%, rgba(52,211,153,0.05) 0%, transparent 55%);
+    pointer-events: none;
+  }
+
+  /* ── Noise grain ── */
+  body::after {
+    content: '';
+    position: fixed; inset: 0; z-index: 1;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .wrap { position: relative; z-index: 2; max-width: 900px; margin: 0 auto; padding: 0 24px; }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    background: rgba(4,5,15,0.75);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 0;
+  }
+  nav .wrap { display: flex; align-items: center; justify-content: space-between; }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.2rem;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .logo span { -webkit-text-fill-color: var(--text); }
+  .badge {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 99px;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    text-align: center;
+    padding: 96px 0 72px;
+  }
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid rgba(91,127,255,0.3);
+    background: rgba(91,127,255,0.08);
+    padding: 6px 14px;
+    border-radius: 99px;
+    margin-bottom: 28px;
+    animation: fadeUp 0.6s ease both;
+  }
+  .hero-tag::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--accent);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    line-height: 1.1;
+    letter-spacing: -1.5px;
+    margin-bottom: 20px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+  .hero h1 .grad {
+    background: linear-gradient(135deg, #5b7fff 0%, #a78bfa 50%, #34d399 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero p {
+    font-size: 1.05rem;
+    color: var(--muted);
+    max-width: 520px;
+    margin: 0 auto 40px;
+    line-height: 1.7;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  /* Stats row */
+  .stats {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+  .stat { text-align: center; }
+  .stat-val {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.5rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .stat-label { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.05em; margin-top: 2px; }
+
+  /* ── FILTERS ── */
+  .filter-block {
+    margin-bottom: 36px;
+    animation: fadeUp 0.6s 0.35s ease both;
+  }
+  .filter-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+    padding-left: 2px;
+  }
+  .filter-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .filter-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .filter-group-label {
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(120,128,164,0.5);
+    min-width: 44px;
+    flex-shrink: 0;
+  }
+  .filter-pills {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 500;
+    padding: 6px 16px;
+    border-radius: 99px;
+    border: 1px solid var(--border);
+    background: rgba(14,17,40,0.6);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    letter-spacing: 0.02em;
+    position: relative;
+    overflow: hidden;
+  }
+  .filter-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 99px;
+    opacity: 0;
+    transition: opacity 0.18s;
+    background: linear-gradient(135deg, rgba(91,127,255,0.15), rgba(167,139,250,0.1));
+  }
+  .filter-btn:hover { color: var(--text); border-color: rgba(91,127,255,0.3); }
+  .filter-btn:hover::after { opacity: 1; }
+  .filter-btn.active {
+    background: rgba(91,127,255,0.18);
+    border-color: rgba(91,127,255,0.55);
+    color: #a5b4fc;
+    box-shadow: 0 0 12px rgba(91,127,255,0.15), inset 0 0 0 0.5px rgba(91,127,255,0.2);
+  }
+  .filter-btn.active::after { opacity: 1; }
+  /* All button special */
+  .filter-btn[data-filter="all"].active {
+    background: linear-gradient(135deg, rgba(91,127,255,0.25), rgba(167,139,250,0.2));
+    border-color: rgba(167,139,250,0.5);
+    color: var(--accent2);
+    box-shadow: 0 0 16px rgba(167,139,250,0.15);
+  }
+  .filter-divider {
+    width: 1px;
+    height: 20px;
+    background: var(--border);
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  /* ── CARDS ── */
+  .list { display: flex; flex-direction: column; gap: 14px; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    display: grid;
+    grid-template-columns: 44px 1fr auto;
+    align-items: center;
+    gap: 20px;
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    animation: fadeUp 0.5s ease both;
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(91,127,255,0.04) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .card:hover::before { opacity: 1; }
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(91,127,255,0.2), 0 0 30px rgba(91,127,255,0.07);
+    border-color: rgba(91,127,255,0.25);
+  }
+
+  /* top card shimmer */
+  .card.top-card {
+    border-color: rgba(245,200,66,0.2);
+    background: linear-gradient(135deg, #0e1128 0%, #12102a 100%);
+  }
+  .card.top-card:hover {
+    border-color: rgba(245,200,66,0.45);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 30px rgba(245,200,66,0.08);
+  }
+
+  .rank {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.05rem;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1;
+  }
+  .rank.r1 { color: var(--gold); text-shadow: 0 0 12px rgba(245,200,66,0.5); font-size: 1.2rem; }
+  .rank.r2 { color: #b0b8c8; }
+  .rank.r3 { color: #cd7f32; }
+
+  .card-info {}
+  .card-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: -0.3px;
+    margin-bottom: 5px;
+  }
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag {
+    font-size: 0.67rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 99px;
+    border: 1px solid;
+  }
+  .tag-mesh { color: var(--accent2); border-color: rgba(167,139,250,0.3); background: rgba(167,139,250,0.08); }
+  .tag-wifi6 { color: var(--green); border-color: rgba(52,211,153,0.3); background: rgba(52,211,153,0.08); }
+  .tag-wifi5 { color: #60a5fa; border-color: rgba(96,165,250,0.3); background: rgba(96,165,250,0.08); }
+  .tag-budget { color: #fb923c; border-color: rgba(251,146,60,0.3); background: rgba(251,146,60,0.08); }
+  .tag-tri { color: #e879f9; border-color: rgba(232,121,249,0.3); background: rgba(232,121,249,0.08); }
+
+  .score-area { text-align: right; min-width: 90px; }
+  .score-num {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.6rem;
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+  .score-denom {
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-weight: 400;
+  }
+  .bar-wrap {
+    width: 80px;
+    height: 4px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 99px;
+    margin-top: 6px;
+    margin-left: auto;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 1s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* Score color tiers */
+  .s-excellent .score-num { color: var(--gold); }
+  .s-excellent .bar-fill { background: linear-gradient(90deg, #f5c842, #fde68a); }
+  .s-great .score-num { color: var(--green); }
+  .s-great .bar-fill { background: linear-gradient(90deg, #34d399, #6ee7b7); }
+  .s-good .score-num { color: #60a5fa; }
+  .s-good .bar-fill { background: linear-gradient(90deg, #60a5fa, #93c5fd); }
+  .s-ok .score-num { color: var(--muted); }
+  .s-ok .bar-fill { background: linear-gradient(90deg, #7880a4, #a3aac7); }
+
+  /* ── SECTION LABEL ── */
+  .section-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+    margin-top: 36px;
+    padding-left: 4px;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    margin-top: 72px;
+    position: relative; z-index: 2;
+    border-top: 1px solid var(--border);
+  }
+  .footer-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 52px 24px 40px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 40px;
+    align-start: start;
+  }
+  .footer-left {}
+  .footer-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+  .footer-desc {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.75;
+    max-width: 380px;
+    margin-bottom: 28px;
+  }
+  .footer-copy {
+    font-size: 0.75rem;
+    color: rgba(120,128,164,0.6);
+    letter-spacing: 0.02em;
+  }
+  .footer-copy a {
+    color: var(--accent2);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  .footer-copy a:hover { color: var(--accent); }
+  .footer-right {
+    text-align: right;
+    padding-top: 4px;
+  }
+  .footer-stat {
+    margin-bottom: 16px;
+  }
+  .footer-stat-num {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.3rem;
+    color: var(--text);
+  }
+  .footer-stat-label {
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .fb-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--muted);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 99px;
+    transition: all 0.2s;
+    background: rgba(14,17,40,0.5);
+  }
+  .fb-link:hover {
+    color: #60a5fa;
+    border-color: rgba(96,165,250,0.35);
+    background: rgba(96,165,250,0.08);
+  }
+  .fb-link svg { flex-shrink: 0; }
+  @media (max-width: 600px) {
+    .footer-inner { grid-template-columns: 1fr; gap: 28px; }
+    .footer-right { text-align: left; }
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Card stagger delays */
+  .card:nth-child(1)  { animation-delay: 0.05s }
+  .card:nth-child(2)  { animation-delay: 0.10s }
+  .card:nth-child(3)  { animation-delay: 0.15s }
+  .card:nth-child(4)  { animation-delay: 0.20s }
+  .card:nth-child(5)  { animation-delay: 0.25s }
+  .card:nth-child(6)  { animation-delay: 0.30s }
+  .card:nth-child(7)  { animation-delay: 0.35s }
+  .card:nth-child(8)  { animation-delay: 0.40s }
+  .card:nth-child(9)  { animation-delay: 0.45s }
+
+  /* ── MOBILE ── */
+  @media (max-width: 600px) {
+    .card { grid-template-columns: 36px 1fr auto; padding: 18px 16px; gap: 12px; }
+    .bar-wrap { width: 60px; }
+    .score-num { font-size: 1.35rem; }
+    .hero h1 { letter-spacing: -1px; }
+    .stats { gap: 24px; }
+  }
+
+  /* Hidden filter */
+  .card[data-hidden="true"] {
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="logo">Router<span>Rank</span></div>
+    <div class="badge">Researcher's List 2025</div>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <section class="hero">
+    <div class="hero-tag">Hand-tested &amp; Verified</div>
+    <h1>The <span class="grad">Best Routers</span><br>You Can Buy Today</h1>
+    <p>An independently researched ranking of home routers and mesh systems — scored on real-world performance, value, and reliability.</p>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-val">9</div>
+        <div class="stat-label">Routers Tested</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val">3</div>
+        <div class="stat-label">Brands Covered</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val">9.5</div>
+        <div class="stat-label">Top Score</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filters -->
+  <div class="filter-block">
+    <div class="filter-label">Filter by</div>
+    <div class="filter-groups">
+      <div class="filter-row">
+        <span class="filter-group-label">View</span>
+        <div class="filter-pills">
+          <button class="filter-btn active" data-filter="all" onclick="doFilter(this,'all')">All Routers</button>
+        </div>
+        <div class="filter-divider"></div>
+        <div class="filter-pills">
+          <button class="filter-btn" data-filter="mesh" onclick="doFilter(this,'mesh')">🔗 Mesh</button>
+          <button class="filter-btn" data-filter="budget" onclick="doFilter(this,'budget')">💰 Budget</button>
+        </div>
+      </div>
+      <div class="filter-row">
+        <span class="filter-group-label">Wi-Fi</span>
+        <div class="filter-pills">
+          <button class="filter-btn" data-filter="wifi6" onclick="doFilter(this,'wifi6')">Wi-Fi 6</button>
+          <button class="filter-btn" data-filter="wifi5" onclick="doFilter(this,'wifi5')">Wi-Fi 5</button>
+        </div>
+      </div>
+      <div class="filter-row">
+        <span class="filter-group-label">Brand</span>
+        <div class="filter-pills">
+          <button class="filter-btn" data-filter="tplink" onclick="doFilter(this,'tplink')">TP-Link</button>
+          <button class="filter-btn" data-filter="cudy" onclick="doFilter(this,'cudy')">Cudy</button>
+          <button class="filter-btn" data-filter="mercusys" onclick="doFilter(this,'mercusys')">Mercusys</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Pick -->
+  <div id="top-pick-section">
+  <div class="section-label">🏆 Top Pick</div>
+  <div class="list" id="list">
+
+    <div class="card top-card s-excellent" data-tags="mesh wifi6 tplink">
+      <div class="rank r1">#1</div>
+      <div class="card-info">
+        <div class="card-name">TP-Link Deco X50</div>
+        <div class="tags">
+          <span class="tag tag-mesh">Mesh</span>
+          <span class="tag tag-wifi6">Wi-Fi 6</span>
+        </div>
+      </div>
+      <div class="score-area">
+        <div class="score-num">9.5<span class="score-denom">/10</span></div>
+        <div class="bar-wrap"><div class="bar-fill" style="width:95%"></div></div>
+      </div>
+    </div>
+
+  </div><!-- /top-pick-section -->
+
+  <!-- Rest of Rankings -->
+  <div class="section-label" style="animation-delay:0.5s">📊 Full Rankings</div>
+  <div class="list" id="list2">
+
+    <div class="card s-excellent" data-tags="wifi6 cudy tri">
+      <div class="rank r2">#2</div>
+      <div class="card-info">
+        <div class="card-name">Cudy TR3000</div>
+        <div class="tags">
+          <span class="tag tag-wifi6">Wi-Fi 6</span>
+          <span class="tag tag-tri">Tri-Band</span>
+        </div>
+      </div>
+      <div class="score-area">
+        <div class="score-num">9.2<span class="score-denom">/10</span></div>
+        <div class="bar-wrap"><div class="bar-fill" style="width:92%"></div></div>
+      </div>
+    </div>
+
+    <div class="card s-excellent" data-tags="wifi6 cudy">
+      <div class="rank r3">#3</div>
+      <div class="card-info">
+        <div class="card-name">Cudy WR3000</div>
+        <div class="tags">
+          <span class="tag tag-wifi6">Wi-Fi 6</span>
+        </div>
+      </div>
+      <div class="score-area">
+        <div class="score-num">9.0<span class="score-denom">/10</span></div>
+        <div class="bar-wrap"><div class="bar-fill" style="width:90%"></div></div>
+      </div>
+    </div>
+
+    <div class="card s-great" data-tags="wifi6 cudy">
+      <div class="rank">#4</div>
+      <div class="card-info">
+        <div class="card-name">Cudy WR3000S</div>
+        <div class="tags">
+          <span class="tag tag-wifi6">Wi-Fi 6</span>
+        </div>
+      </div>
+      <div class="score-area">
+        <div class="score-num">8.8<span class="score-denom">/10</span></div>
+        <div class="bar-wrap"><div class="bar-fill" style="width:88%"></div></div>
+      </div>
+    </div>
+
+    <div class="card s-great" data-tags="wifi6 mercusys">
+      <div class="rank">#5</div>
+      <div class="card-info">
+        <div class="card-name">Mercusys MR80X</div>
+        <div class="tags">
+          <span class="tag tag-wifi6">Wi-Fi 6</span>
+        </div>
+      </div>
+      <div class="score-area">
+        <div class="score-num">8.7<span class="score-denom">/10</span></div>
+        <div class="bar-wrap"><div class="bar-fill" style="width:87%"></div></div>
+      </div>
+    </div>
+
+    <div class="card s-great" data-tags="wifi6 tplink">
+      <div class="rank">#6</div>
+      <div class="card-info">
+        <div class="card-name">TP-Link Archer AX53</div>
+        <div class="tags">
+          <span class="tag tag-wifi6">Wi-Fi 6</span>
+        </div>
+      </div>
+      <div class="score-area">
+        <div class="score-num">8.5<span class="score-denom">/10</span></div>
+        <div class="bar-wrap"><div class="bar-fill" style="width:85%"></div></div>
+      </div>
+    </div>
+
+    <div class="card s-good" data-tags="wifi6 tplink budget">
+      <div class="rank">#7</div>
+      <div class="card-info">
+        <div class="card-name">TP-Link Archer AX1500</div>
+        <div class="tags">
+          <span class="tag tag-wifi6">Wi-Fi 6</span>
+          <span class="tag tag-budget">Budget</span>
+        </div>
+      </div>
+      <div class="score-area">
+        <div class="score-num">7.5<span class="score-denom">/10</span></div>
+        <div class="bar-wrap"><div class="bar-fill" style="width:75%"></div></div>
+      </div>
+    </div>
+
+    <div class="card s-good" data-tags="wifi5 tplink budget">
+      <div class="rank">#8</div>
+      <div class="card-info">
+        <div class="card-name">TP-Link Archer C80</div>
+        <div class="tags">
+          <span class="tag tag-wifi5">Wi-Fi 5</span>
+          <span class="tag tag-budget">Budget</span>
+        </div>
+      </div>
+      <div class="score-area">
+        <div class="score-num">7.0<span class="score-denom">/10</span></div>
+        <div class="bar-wrap"><div class="bar-fill" style="width:70%"></div></div>
+      </div>
+    </div>
+
+    <div class="card s-ok" data-tags="wifi5 tplink budget">
+      <div class="rank">#9</div>
+      <div class="card-info">
+        <div class="card-name">TP-Link Archer C6 v6</div>
+        <div class="tags">
+          <span class="tag tag-wifi5">Wi-Fi 5</span>
+          <span class="tag tag-budget">Budget</span>
+        </div>
+      </div>
+      <div class="score-area">
+        <div class="score-num">6.5<span class="score-denom">/10</span></div>
+        <div class="bar-wrap"><div class="bar-fill" style="width:65%"></div></div>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-left">
+      <div class="footer-logo">RouterRank</div>
+      <p class="footer-desc">
+        RouterRank is an independently maintained resource built for everyday users who want honest, no-nonsense guidance on home networking gear. Every router on this list has been personally researched and evaluated — no sponsored placements, no brand deals. Just real scores based on speed, range, value, and reliability.
+      </p>
+      <div class="footer-copy">
+        © Copyright 2026 —
+        <a href="https://www.facebook.com/visualsbvsabbir" target="_blank" rel="noopener">SABBIR</a>
+      </div>
+    </div>
+    <div class="footer-right">
+      <div class="footer-stat">
+        <div class="footer-stat-num">9</div>
+        <div class="footer-stat-label">Routers Ranked</div>
+      </div>
+      <div class="footer-stat">
+        <div class="footer-stat-num">2026</div>
+        <div class="footer-stat-label">Updated</div>
+      </div>
+      <a class="fb-link" href="https://www.facebook.com/visualsbvsabbir" target="_blank" rel="noopener">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        Follow on Facebook
+      </a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  function doFilter(btn, tag) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const allCards = document.querySelectorAll('.card');
+    allCards.forEach(card => {
+      if (tag === 'all') {
+        card.removeAttribute('data-hidden');
+      } else {
+        const tags = card.getAttribute('data-tags') || '';
+        if (tags.split(' ').includes(tag)) {
+          card.removeAttribute('data-hidden');
+        } else {
+          card.setAttribute('data-hidden', 'true');
+        }
+      }
+    });
+
+    // Show/hide Top Pick section label if top card is hidden
+    const topSection = document.getElementById('top-pick-section');
+    const topCard = topSection.querySelector('.card');
+    topSection.style.display = topCard.getAttribute('data-hidden') === 'true' ? 'none' : '';
+  }
+
+  // Animate bars on load
+  window.addEventListener('load', () => {
+    document.querySelectorAll('.bar-fill').forEach(bar => {
+      const w = bar.style.width;
+      bar.style.width = '0%';
+      setTimeout(() => { bar.style.width = w; }, 300);
+    });
+  });
+</script>
+</body>
+</html>
